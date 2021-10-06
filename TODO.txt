@@ -1,3 +1,5 @@
+KONSTIG ALGO SOM INGEN FATTAR
+
 TODO 1. SCAN INFIX FROM LEFT TO RIGHT
 
 TODO 2. If the scanned character is an operand, append it with final Infix to Postfix string.

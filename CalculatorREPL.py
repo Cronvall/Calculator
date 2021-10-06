@@ -1,5 +1,5 @@
 # package calculator
-from Calculator import eval_expr
+import Calculator
 
 
 #   A command line interface for the Calculator
@@ -22,7 +22,7 @@ def repl_loop():
 
 def evaluate_command(command):
     try:
-        result = eval_expr(command)
+        result = Calculator.eval_expr(command)
         print(result)
     except NotImplemented as ex:
         print(ex)
@@ -42,4 +42,7 @@ def goodbye():
 
 
 if __name__ == "__main__":
-    program()
+    input = get_input()
+    a = Calculator.infix_to_postfix(input)
+    print(a)
+    #program()
