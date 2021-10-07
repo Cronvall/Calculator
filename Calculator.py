@@ -26,14 +26,14 @@ MISSING_OPERATOR: str = "Missing operator or parenthesis"
 OP_NOT_FOUND: str = "Operator not found"
 OPERATORS: str = "+-*/^"
 
-class Stack():
 
-<<<<<<< Updated upstream
+class Stack:
+
     def __init__(self):
         self.stack = []
 
     def top(self):
-        if not self.isEmpty():
+        if not self.is_empty():
             return self.stack[0]
         else:
             return -1
@@ -41,7 +41,7 @@ class Stack():
     def pop(self):
         self.stack.pop(0)
 
-    def isEmpty(self):
+    def is_empty(self):
         if len(self.stack) < 1:
             return True
         else:
@@ -50,7 +50,8 @@ class Stack():
     def push(self, ch):
         self.stack.insert(0, ch)
 
-def infix_to_postfix(characters: str):
+
+def infix_to_postfix(characters: list):
     s = Stack()
     result = ''
 
@@ -59,13 +60,13 @@ def infix_to_postfix(characters: str):
             result += ch
 
         elif ch == ')':
-            while not s.isEmpty() and not s.top() == '(':
+            while not s.is_empty() and not s.top() == '(':
                 result = result + s.top()
                 s.pop()
             s.pop()
 
         elif isOperator(ch):
-            while not s.isEmpty() and Higer_precedence(s.top(),ch) and s.top() == '(':
+            while not s.is_empty() and higher_precedence(s.top(), ch) and s.top() == '(':
                 result = result + str(s.top())
                 s.pop()
             s.push(ch)
@@ -73,15 +74,16 @@ def infix_to_postfix(characters: str):
         elif ch == '(':
             s.push(ch)
 
-
-    while not s.isEmpty():
+    while not s.is_empty():
         result = result + str(s.top())
         s.pop()
+
+    result = list(result)
 
     return result
 
 
-def Higer_precedence(stack_top, op_2):
+def higher_precedence(stack_top, op_2):
     return get_precedence(op_2) > get_precedence(stack_top)
 
 
@@ -91,33 +93,32 @@ def isOperator(ch):
     else:
         return False
 
+
 def isOperand(ch):
     isTrue = True
     try:
         int(ch)
     except:
         isTrue = False
-    return  isTrue
-=======
-def infix_to_postfix(tokens):
-    return []  # TODO
->>>>>>> Stashed changes
+    return isTrue
 
 
 # -----  Evaluate RPN expression -------------------
 def eval_postfix(postfix_tokens):
-<<<<<<< Updated upstream
-    #TODO Calculate from RPN
-    return 0
-=======
     # TODO Calculate from RPN
     operand1: float
     operand2: float
     operator: str
+    i: int = 0
 
-    for i in range(len(postfix_tokens)):
+    while i < len(postfix_tokens) :
+
+        if len(postfix_tokens) < i:
+            i = 0
+
         if postfix_tokens[i] in "+-*/":
-            operator = postfix_tokens[i]
+
+            operator = str(postfix_tokens[i])
 
             associative = get_associativity(operator)
 
@@ -130,6 +131,9 @@ def eval_postfix(postfix_tokens):
                     rpn_calculate_right(postfix_tokens, i, operator)
                 else:
                     rpn_calculate_left(postfix_tokens, i, operator)
+            i = 0
+        else:
+            i += 1
 
     return postfix_tokens[0]
 
@@ -141,16 +145,16 @@ def remove_used_tokens(postfix_tokens, i):
 
 
 def rpn_calculate_left(postfix_tokens: list, i: int, operator: str):
-    operand1 = postfix_tokens[i - 2]
-    operand2 = postfix_tokens[i - 1]
-    postfix_tokens[i - 2] = apply_operator(operator, operand1, operand2)
+    operand1 = int(postfix_tokens[i - 2])
+    operand2 = int(postfix_tokens[i - 1])
+    postfix_tokens[i - 2] = str(apply_operator(operator, operand1, operand2))
 
     remove_used_tokens(postfix_tokens, i)
 
 
 def rpn_calculate_right(postfix_tokens: list, i: int, operator: str):
-    operand1 = postfix_tokens[i - 1]
-    operand2 = postfix_tokens[i + 1]
+    operand1 = int(postfix_tokens[i - 1])
+    operand2 = int(postfix_tokens[i + 1])
     postfix_tokens[i - 1] = apply_operator(operator, operand1, operand2)
 
     remove_used_tokens(postfix_tokens, i + 2)
@@ -158,32 +162,30 @@ def rpn_calculate_right(postfix_tokens: list, i: int, operator: str):
 
 # Function to find
 def find_right_associativity(postfix_tokens: list, i: int):
-    if postfix_tokens[i+2] == "^":
+    if postfix_tokens[i + 2] == "^":
         return True
     else:
         return False
->>>>>>> Stashed changes
 
 
 # Method used in REPL
 def eval_expr(expr: str):
     if len(expr) == 0:
         return nan
-<<<<<<< Updated upstream
-    tokens = expr.split()                                       #Tokens is a list consisting of each char in the original expresion
-    #postfix_tokens = infix_to_postfix(tokens)    #Returns the expresion in RTN-format
-    #return eval_postfix(postfix_tokens)             #Returns the solution using the interperated RTN-expresion
-=======
+
+    tokens = expr.split()  # Tokens is a list consisting of each char in the original expresion
+    # postfix_tokens = infix_to_postfix(tokens)    #Returns the expresion in RTN-format
+    # return eval_postfix(postfix_tokens)             #Returns the solution using the interperated RTN-expresion
+
     tokens = expr.split()
     postfix_tokens = infix_to_postfix(tokens)  # Returns the expresion in RTN-format
     return eval_postfix(postfix_tokens)  # Returns the interperated RTN-expresion
->>>>>>> Stashed changes
 
 
 def apply_operator(op: str, d1: float, d2: float):
     op_switcher = {
         "+": d1 + d2,
-        "-": d2 - d1,
+        "-": d1 - d2,
         "*": d1 * d2,
         "/": nan if d1 == 0 else d2 / d1,
         "^": d2 ** d1
@@ -223,3 +225,5 @@ def tokenize(expr: str):
     return None  # TODO
 
 # TODO Possibly more methods
+
+
