@@ -111,31 +111,38 @@ def eval_postfix(postfix_tokens):
     operator: str
     i: int = 0
 
-    while i < len(postfix_tokens) :
+    while i < len(postfix_tokens):
 
         if len(postfix_tokens) < i:
             i = 0
 
-        if postfix_tokens[i] in "+-*/":
+        if postfix_tokens[i] in "+-*/^":
 
             operator = str(postfix_tokens[i])
 
             associative = get_associativity(operator)
 
             if associative == Assoc.LEFT:
-                rpn_calculate_left(postfix_tokens, i, operator)
+                rpn_calculate(postfix_tokens, i, operator)
 
             elif associative == Assoc.RIGHT:
-                calc_or_find: bool = find_right_associativity(postfix_tokens, i)
-                if calc_or_find:
-                    rpn_calculate_right(postfix_tokens, i, operator)
-                else:
-                    rpn_calculate_left(postfix_tokens, i, operator)
+                find_more_priorities(postfix_tokens, i, operator)
             i = 0
         else:
             i += 1
 
     return postfix_tokens[0]
+
+
+def find_more_priorities(postfix_tokens: list, i: int, operator: str):
+    find: bool = find_right_associativity(postfix_tokens, i)
+    j: int = i
+
+    while find:
+        i += 1
+        find = find_right_associativity(postfix_tokens, i)
+
+    rpn_calculate(postfix_tokens, j, operator)
 
 
 # Function to calculate from RPN
@@ -144,28 +151,22 @@ def remove_used_tokens(postfix_tokens, i):
     postfix_tokens.pop(i - 1)
 
 
-def rpn_calculate_left(postfix_tokens: list, i: int, operator: str):
-    operand1 = int(postfix_tokens[i - 2])
-    operand2 = int(postfix_tokens[i - 1])
+def rpn_calculate(postfix_tokens: list, i: int, operator: str):
+    operand1 = float(postfix_tokens[i - 2])
+    operand2 = float(postfix_tokens[i - 1])
     postfix_tokens[i - 2] = str(apply_operator(operator, operand1, operand2))
 
     remove_used_tokens(postfix_tokens, i)
 
 
-def rpn_calculate_right(postfix_tokens: list, i: int, operator: str):
-    operand1 = int(postfix_tokens[i - 1])
-    operand2 = int(postfix_tokens[i + 1])
-    postfix_tokens[i - 1] = apply_operator(operator, operand1, operand2)
-
-    remove_used_tokens(postfix_tokens, i + 2)
-
-
 # Function to find
 def find_right_associativity(postfix_tokens: list, i: int):
-    if postfix_tokens[i + 2] == "^":
-        return True
-    else:
-        return False
+    try:
+        if postfix_tokens[i + 1] == "^":
+            return True
+    except:
+        IndexError
+    return False
 
 
 # Method used in REPL
@@ -187,8 +188,8 @@ def apply_operator(op: str, d1: float, d2: float):
         "+": d1 + d2,
         "-": d1 - d2,
         "*": d1 * d2,
-        "/": nan if d1 == 0 else d2 / d1,
-        "^": d2 ** d1
+        "/": nan if d2 == 0 else d1 / d2,
+        "^": d1 ** d2
     }
     return op_switcher.get(op, ValueError(OP_NOT_FOUND))
 
@@ -225,5 +226,3 @@ def tokenize(expr: str):
     return None  # TODO
 
 # TODO Possibly more methods
-
-
