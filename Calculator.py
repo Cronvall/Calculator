@@ -26,7 +26,6 @@ MISSING_OPERATOR: str = "Missing operator or parenthesis"
 OP_NOT_FOUND: str = "Operator not found"
 OPERATORS: str = "+-*/^"
 
-
 class Stack:
 
     def __init__(self):
@@ -50,45 +49,66 @@ class Stack:
     def push(self, ch):
         self.stack.insert(0, ch)
 
+def set_expresion_list(expr):
+    tmp = ""
+    result = []
+    for i in range(len(expr)):
+        if isOperand(expr[i]) or expr[i] == '.':
+            tmp += expr[i]
+
+        elif isOperator(expr[i]):
+            if not tmp == "":
+                result.append(tmp)
+            result.append(expr[i])
+            tmp = ""
+
+        #For the last index of the list
+        if i == len(expr) -1 and not tmp == "":
+            result.append(tmp)
+            tmp = ""
+
+    print("all expresions:",result)
+    return result
 
 def infix_to_postfix(characters: list):
     s = Stack()
-    result = ''
+    result = []
 
-    for ch in characters:
-        if isOperand(ch):
-            result += ch
+    expressions = set_expresion_list(characters)
 
-        elif ch == ')':
+    for expr in expressions:
+        if isOperand(expr):
+            result.append(expr)
+
+        elif expr == ')':
             while not s.is_empty() and not s.top() == '(':
-                result = result + s.top()
+                result.append(s.top())
                 s.pop()
             s.pop()
 
-        elif isOperator(ch):
-            while not s.is_empty() and higher_precedence(s.top(), ch) and s.top() == '(':
-                result = result + str(s.top())
+        elif isOperator(expr):
+            while not s.is_empty() and s.top() == '(' and higher_precedence(s.top(), expr) :
+                result.append(str(s.top()))
                 s.pop()
-            s.push(ch)
+            s.push(expr)
 
-        elif ch == '(':
-            s.push(ch)
+        elif expr == '(':
+            s.push(expr)
 
     while not s.is_empty():
-        result = result + str(s.top())
+        result.append(str(s.top()))
         s.pop()
-
-    result = list(result)
 
     return result
 
 
 def higher_precedence(stack_top, op_2):
+    print("HEJ",stack_top, op_2)
     return get_precedence(op_2) > get_precedence(stack_top)
 
 
 def isOperator(ch):
-    if ch == '+' or '-' or '*' or '^' or '/' or ')':
+    if ch == '+' or '-' or '*' or '^' or '/' or ')' or '(':
         return True
     else:
         return False
@@ -97,7 +117,7 @@ def isOperator(ch):
 def isOperand(ch):
     isTrue = True
     try:
-        int(ch)
+        float(ch)
     except:
         isTrue = False
     return isTrue
@@ -145,16 +165,16 @@ def remove_used_tokens(postfix_tokens, i):
 
 
 def rpn_calculate_left(postfix_tokens: list, i: int, operator: str):
-    operand1 = int(postfix_tokens[i - 2])
-    operand2 = int(postfix_tokens[i - 1])
+    operand1 = float(postfix_tokens[i - 2])
+    operand2 = float(postfix_tokens[i - 1])
     postfix_tokens[i - 2] = str(apply_operator(operator, operand1, operand2))
 
     remove_used_tokens(postfix_tokens, i)
 
 
 def rpn_calculate_right(postfix_tokens: list, i: int, operator: str):
-    operand1 = int(postfix_tokens[i - 1])
-    operand2 = int(postfix_tokens[i + 1])
+    operand1 = float(postfix_tokens[i - 1])
+    operand2 = float(postfix_tokens[i + 1])
     postfix_tokens[i - 1] = apply_operator(operator, operand1, operand2)
 
     remove_used_tokens(postfix_tokens, i + 2)

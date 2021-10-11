@@ -45,7 +45,7 @@ if __name__ == "__main__":
     input = get_input()
     a = Calculator.infix_to_postfix(input)
 
-    print(a)
+    print("Postfix:", a)
 
     result = Calculator.eval_postfix(a)
     print(result)
