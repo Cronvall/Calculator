@@ -26,6 +26,7 @@ MISSING_OPERATOR: str = "Missing operator or parenthesis"
 OP_NOT_FOUND: str = "Operator not found"
 OPERATORS: str = "+-*/^"
 
+
 class Stack:
 
     def __init__(self):
@@ -49,6 +50,7 @@ class Stack:
     def push(self, ch):
         self.stack.insert(0, ch)
 
+
 def set_expresion_list(expr):
     tmp = ""
     result = []
@@ -62,13 +64,14 @@ def set_expresion_list(expr):
             result.append(expr[i])
             tmp = ""
 
-        #For the last index of the list
-        if i == len(expr) -1 and not tmp == "":
+        # For the last index of the list
+        if i == len(expr) - 1 and not tmp == "":
             result.append(tmp)
             tmp = ""
 
-    print("all expresions:",result)
+    print("all expresions:", result)
     return result
+
 
 def infix_to_postfix(characters: list):
     s = Stack()
@@ -87,9 +90,10 @@ def infix_to_postfix(characters: list):
             s.pop()
 
         elif isOperator(expr):
-            while not s.is_empty() and s.top() == '(' and higher_precedence(s.top(), expr) :
-                result.append(str(s.top()))
+            while not s.is_empty() and s.top() == '(' and higher_precedence(s.top(), expr):
                 s.pop()
+                result.append(str(s.top()))
+
             s.push(expr)
 
         elif expr == '(':
@@ -103,7 +107,6 @@ def infix_to_postfix(characters: list):
 
 
 def higher_precedence(stack_top, op_2):
-    print("HEJ",stack_top, op_2)
     return get_precedence(op_2) > get_precedence(stack_top)
 
 
