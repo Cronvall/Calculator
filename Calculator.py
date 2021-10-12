@@ -1,4 +1,5 @@
 # package calculator
+
 from collections import deque
 from math import nan
 from enum import Enum
@@ -20,192 +21,90 @@ from enum import Enum
 #
 # To run the program, run either CalculatorREPL or CalculatorGUI
 
-MISSING_OPERAND: str = "Missing or bad operand"
-DIV_BY_ZERO: str = "Division with 0"
+MISSING_OPERAND:  str = "Missing or bad operand"
+DIV_BY_ZERO:      str = "Division with 0"
 MISSING_OPERATOR: str = "Missing operator or parenthesis"
-OP_NOT_FOUND: str = "Operator not found"
-OPERATORS: str = "+-*/^"
-
-class Stack:
-
-    def __init__(self):
-        self.stack = []
-
-    def top(self):
-        if not self.is_empty():
-            return self.stack[0]
-        else:
-            return -1
-
-    def pop(self):
-        self.stack.pop(0)
-
-    def is_empty(self):
-        if len(self.stack) < 1:
-            return True
-        else:
-            return False
-
-    def push(self, ch):
-        self.stack.insert(0, ch)
-
-def set_expresion_list(expr):
-    tmp = ""
-    result = []
-    for i in range(len(expr)):
-        if isOperand(expr[i]) or expr[i] == '.':
-            tmp += expr[i]
-
-        elif isOperator(expr[i]):
-            if not tmp == "":
-                result.append(tmp)
-            result.append(expr[i])
-            tmp = ""
-
-        #For the last index of the list
-        if i == len(expr) -1 and not tmp == "":
-            result.append(tmp)
-            tmp = ""
-
-    print("all expresions:",result)
-    return result
-
-def infix_to_postfix(characters: list):
-    s = Stack()
-    result = []
-
-    expressions = set_expresion_list(characters)
-
-    for expr in expressions:
-        if isOperand(expr):
-            result.append(expr)
-
-        elif expr == ')':
-            while not s.is_empty() and not s.top() == '(':
-                result.append(s.top())
-                s.pop()
-            s.pop()
-
-        elif isOperator(expr):
-            while not s.is_empty() and s.top() == '(' and higher_precedence(s.top(), expr) :
-                result.append(str(s.top()))
-                s.pop()
-            s.push(expr)
-
-        elif expr == '(':
-            s.push(expr)
-
-    while not s.is_empty():
-        result.append(str(s.top()))
-        s.pop()
-
-    return result
+OP_NOT_FOUND:     str = "Operator not found"
+OPERATORS:        str = "+-*/^"
 
 
-def higher_precedence(stack_top, op_2):
-    print("HEJ",stack_top, op_2)
-    return get_precedence(op_2) > get_precedence(stack_top)
+def infix_to_postfix(tokens):
+    output_list = []
+    op_stack = []
+    #TODO THE FIRST OPERATOR WON'T BE ABLE TO APPEND TO THE OP_STACK WITH CURRENT LOGIC, fix
+    for token in tokens:
 
+        if isNumber(token):            #If the token is a number add it to the op_list
+            output_list.append(token)
 
-def isOperator(ch):
-    if ch == '+' or '-' or '*' or '^' or '/' or ')' or '(':
-        return True
-    else:
-        return False
+        elif isOperator(token):     #Whatch method token_is_operator(), for details
+            token_is_operator(token, op_stack, output_list)
 
+        elif token == '(':              #If the token is a '(' add it to the output
+            op_stack.append(token)
 
-def isOperand(ch):
-    isTrue = True
-    try:
-        float(ch)
-    except:
-        isTrue = False
-    return isTrue
+        elif token == ')':
+            if len(op_stack) > 0:     #If there are operators in the operator stack
+                while op_stack[-1] != '(': #Aslong as the top object isn't a '('
+                        output_list.append(op_stack[-1])    #Add to output
+                        op_stack.pop(-1)                                   #Then remove from op_stack
+
+                if op_stack[-1] == '(':     #If the current stack op is a '('
+                    op_stack.pop(-1)            #Remove it
+
+            else:                              #If their are no operators we are  missing operators
+                print(MISSING_OPERATOR)
+                break
+
+    #When we have placed all tokens in either the op_stack or output_list
+    #We are to empty the op_stack
+    while len(op_stack) > 0:
+        if op_stack[-1] != '(':                     #Aslogn as the
+            output_list.append(op_stack[-1])    #Add to output
+            op_stack.pop(-1)                                #remove from op_stack
+
+        elif op_stack[-1] ==  ')':
+            #If we have a ')' at this stage we can be certain we are missing a '('
+            print(MISSING_OPERATOR)
+            break
+
+    return output_list
+
+#If the token is an operator that is not a parentheses  this will be called upon in
+#the infix_to_postfix() method.
+def token_is_operator(token, op_stack, output_list):
+    if len(op_stack) > 0:   #If the op_stack contains anything
+
+        #While loop is ran when the stack_operator has higher precedence then the incoming
+        #operator. IT will also be run if the operators have equal precedence and the incoming
+        # operator isn't a '^' (potenser)
+        while (op_stack[-1] != '(' and ((get_precedence(op_stack[-1]) > get_precedence(token)) or
+               (get_precedence(op_stack[-1]) == get_precedence(token))  and get_associativity(token) == Assoc.LEFT)):
+
+            output_list.append(op_stack[-1]) #Add the stack operator to the output
+            op_stack.pop(-1) #Then remove it from the operator-stack
+
 
 
 # -----  Evaluate RPN expression -------------------
 def eval_postfix(postfix_tokens):
-    # TODO Calculate from RPN
-    operand1: float
-    operand2: float
-    operator: str
-    i: int = 0
-
-    while i < len(postfix_tokens) :
-
-        if len(postfix_tokens) < i:
-            i = 0
-
-        if postfix_tokens[i] in "+-*/":
-
-            operator = str(postfix_tokens[i])
-
-            associative = get_associativity(operator)
-
-            if associative == Assoc.LEFT:
-                rpn_calculate_left(postfix_tokens, i, operator)
-
-            elif associative == Assoc.RIGHT:
-                calc_or_find: bool = find_right_associativity(postfix_tokens, i)
-                if calc_or_find:
-                    rpn_calculate_right(postfix_tokens, i, operator)
-                else:
-                    rpn_calculate_left(postfix_tokens, i, operator)
-            i = 0
-        else:
-            i += 1
-
-    return postfix_tokens[0]
-
-
-# Function to calculate from RPN
-def remove_used_tokens(postfix_tokens, i):
-    postfix_tokens.pop(i)
-    postfix_tokens.pop(i - 1)
-
-
-def rpn_calculate_left(postfix_tokens: list, i: int, operator: str):
-    operand1 = float(postfix_tokens[i - 2])
-    operand2 = float(postfix_tokens[i - 1])
-    postfix_tokens[i - 2] = str(apply_operator(operator, operand1, operand2))
-
-    remove_used_tokens(postfix_tokens, i)
-
-
-def rpn_calculate_right(postfix_tokens: list, i: int, operator: str):
-    operand1 = float(postfix_tokens[i - 1])
-    operand2 = float(postfix_tokens[i + 1])
-    postfix_tokens[i - 1] = apply_operator(operator, operand1, operand2)
-
-    remove_used_tokens(postfix_tokens, i + 2)
-
-
-# Function to find
-def find_right_associativity(postfix_tokens: list, i: int):
-    if postfix_tokens[i + 2] == "^":
-        return True
-    else:
-        return False
+    return 0  # TODO
 
 
 # Method used in REPL
 def eval_expr(expr: str):
     if len(expr) == 0:
         return nan
-
-    tokens = expr.split()  # Tokens is a list consisting of each char in the original expresion
-    # postfix_tokens = infix_to_postfix(tokens)    #Returns the expresion in RTN-format
-    # return eval_postfix(postfix_tokens)             #Returns the solution using the interperated RTN-expresion
-
-    tokens = expr.split()
-    postfix_tokens = infix_to_postfix(tokens)  # Returns the expresion in RTN-format
-    return eval_postfix(postfix_tokens)  # Returns the interperated RTN-expresion
+    tokens = tokenize(expr)
+    postfix_tokens = infix_to_postfix(tokens)
+    print(postfix_tokens)
+    return eval_postfix(postfix_tokens)
 
 
 def apply_operator(op: str, d1: float, d2: float):
     op_switcher = {
         "+": d1 + d2,
-        "-": d1 - d2,
+        "-": d2 - d1,
         "*": d1 * d2,
         "/": nan if d1 == 0 else d2 / d1,
         "^": d2 ** d1
@@ -219,9 +118,7 @@ def get_precedence(op: str):
         "-": 2,
         "*": 3,
         "/": 3,
-        "^": 4,
-        "(": 5,
-        ")": 5
+        "^": 4
     }
     return op_switcher.get(op, ValueError(OP_NOT_FOUND))
 
@@ -242,8 +139,45 @@ def get_associativity(op: str):
 
 # ---------- Tokenize -----------------------
 def tokenize(expr: str):
-    return None  # TODO
+    tmp = ""
+    result = []
+    for i in range(len(expr)):
 
-# TODO Possibly more methods
+        if isNumber(expr[i]) or expr[i] == '.':
+            tmp += expr[i]
+
+        elif isOperator(expr[i]):
+            if not tmp == "":
+                result.append(tmp)
+            result.append(expr[i])
+            tmp = ""
+
+        # For the last index of the list
+        if i == len(expr) - 1 and not tmp == "":
+            result.append(tmp)
+            tmp = ""
+
+    return result
 
 
+def isOperator(token):
+    if token == '+' or '-' or '*' or '^' or '/' or ')' or '(':
+        return True
+    else:
+        return False
+
+
+def isNumber(token):
+    isTrue = True
+    try:
+        float(token)
+    except:
+        isTrue = False
+    return isTrue
+
+
+if __name__ == "__main__": #ONLY RUN THIS FOR TESTING
+    tokens = tokenize("(3+5)")
+    print(tokens)
+    result = infix_to_postfix(tokens)
+    print(result)
