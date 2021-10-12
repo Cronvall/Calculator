@@ -73,6 +73,37 @@ def set_expresion_list(expr):
     return result
 
 
+def find_next_operator(start_index, list):
+
+    for i in range(start_index, len(list)):
+        if isOperator(list[i]):
+            return list[i]
+
+    return nan
+
+
+def infix_to_postfix_v2(characters: list):
+    s = Stack()
+    result = []
+
+    expressions = set_expresion_list(characters)
+
+    for i in range(len(expressions)):
+        expr = expressions[i]
+
+        if isOperand(expr):
+            result.append(expr)
+        elif isOperator(expr):
+            stack_top: str = find_next_operator(i, expressions)
+            stack_top = s.top()
+
+            while (isOperator(stack_top) and
+                   higher_precedence(expr, stack_top) or
+                   get_precedence(stack_top) == get_precedence(expr) and
+                   get_associativity(expr) == Assoc.LEFT):
+                pass
+
+
 def infix_to_postfix(characters: list):
     s = Stack()
     result = []
@@ -90,10 +121,10 @@ def infix_to_postfix(characters: list):
             s.pop()
 
         elif isOperator(expr):
-            while not s.is_empty() and s.top() == '(' and higher_precedence(s.top(), expr):
-                s.pop()
-                result.append(str(s.top()))
 
+            while not s.is_empty() and higher_precedence(s.top(), expr) and s.top() == '(':
+                result.append(str(s.top()))
+                s.pop()
             s.push(expr)
 
         elif expr == '(':

@@ -49,4 +49,4 @@ if __name__ == "__main__":
 
     result = Calculator.eval_postfix(a)
     print(result)
-    #program()
+    # program()
